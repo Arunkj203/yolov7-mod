@@ -23,7 +23,7 @@ from utils.general import (
 from utils.plots import color_list, plot_one_box
 from utils.torch_utils import time_synchronized
 
-from mmcv.ops import DeformConv2d
+# from mmcv.ops import DeformConv2d
 
 # ADDED LAYERS DC,ELAN,ELAN-H,MP1
 # DC Layer
@@ -33,7 +33,7 @@ class DC(nn.Module):
         self.offset_conv = nn.Conv2d(
             in_channels,
             2 * kernel_size * kernel_size,
-            kernel_size=stride,
+            kernel_size=kernel_size,
             stride=stride,
             padding=padding,
         )
@@ -43,6 +43,8 @@ class DC(nn.Module):
     def forward(self, x):
         offset = self.offset_conv(x)
         x = self.deformable_conv(x,offset)
+
+        print(x.shape)
         return x
 
 
@@ -187,6 +189,8 @@ class Concat(nn.Module):
         self.d = dimension
 
     def forward(self, x):
+        for i in x:
+            print("concat",i.shape)
         return torch.cat(x, self.d)
 
 
