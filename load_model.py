@@ -1,6 +1,6 @@
 from models.yolo import Model
 
-cus_model = Model(cfg=".//cfg//training//working-final yolov7 mod.yaml")
+cus_model = Model(cfg=".//cfg//training//yolov7-mod.yaml")
 print(cus_model)
 
 

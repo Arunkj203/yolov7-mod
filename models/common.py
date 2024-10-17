@@ -28,7 +28,7 @@ from utils.torch_utils import time_synchronized
 # ADDED LAYERS DC,ELAN,ELAN-H,MP1
 # DC Layer
 class DC(nn.Module):
-    def __init__(self, in_channels, out_channels, kernel_size, stride=1, padding=0):
+    def __init__(self, in_channels, out_channels, kernel_size, stride=1, padding=1):
         super(DC, self).__init__()
         self.offset_conv = nn.Conv2d(
             in_channels,
@@ -44,7 +44,6 @@ class DC(nn.Module):
         offset = self.offset_conv(x)
         x = self.deformable_conv(x,offset)
 
-        print(x.shape)
         return x
 
 
@@ -93,15 +92,16 @@ class ELAN_H(nn.Module):
         self.conv3 = Conv(mid_channels, mid_channels, 3, 1)
 
         # Concatenation
-        self.concat_conv = Conv(6 * mid_channels, out_channels, 1, 1)
+        concat_in_ch = 2*out_channels + 4*mid_channels
+        self.concat_conv = Conv(concat_in_ch, out_channels, 1, 1)
 
     def forward(self, x):
         # Initial conv layers
         x1 = self.conv1(x)
 
         # Series of conv layers
-        x2 = self.conv2(x)
-        x3 = self.conv3(x2)
+        x2 = self.conv1(x)
+        x3 = self.conv2(x2)
         x4 = self.conv3(x3)
         x5 = self.conv3(x4)
         x6 = self.conv3(x5)
@@ -189,8 +189,6 @@ class Concat(nn.Module):
         self.d = dimension
 
     def forward(self, x):
-        for i in x:
-            print("concat",i.shape)
         return torch.cat(x, self.d)
 
 

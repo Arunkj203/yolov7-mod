@@ -775,7 +775,6 @@ class Model(nn.Module):
         y, dt = [], []  # outputs
         
         for m in self.model:
-            print(m)
             if m.f != -1:  # if not from previous layer
                 x = (
                     y[m.f]
