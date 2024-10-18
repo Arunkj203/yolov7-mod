@@ -4,67 +4,87 @@ import random
 import shutil
 
 from pathlib import Path
-
+from PIL import Image
 
 
 image_folder = "D:\\vs projects\\yolov7-mod\\data\\bdd100k_split"
 output_dir = "D:\\vs projects\\yolov7-mod\\custom_data"
 label_dir = "D:/vs projects/bdd100k_labels_release/bdd100k/labels"
 
+_10k_path = "D:\\vs projects\\bdd100k\\bdd100k\\images\\10k"
+
 train_json_path = os.path.join(label_dir, "bdd100k_labels_images_train.json")
 val_json_path = os.path.join(label_dir, "bdd100k_labels_images_val.json")
 
-train_images_path =os.path.join(image_folder,"train")
-val_images_path = os.path.join(image_folder,"val")
+train_images_path = os.path.join(_10k_path, "train")
+val_images_path = os.path.join(_10k_path, "val")
 
-train_op = os.path.join(output_dir,"labels","train")
-val_op = os.path.join(output_dir,"labels","val")
+train_op = os.path.join(output_dir, "labels", "train")
+val_op = os.path.join(output_dir, "labels", "val")
 
-classes = ['bike', 'bus', 'car', 'drivable area', 'lane', 'motor', 'person', 'rider', 'traffic light', 'traffic sign', 'train', 'truck']
-class_mappings = {
-
-}
+classes = [
+    "bike",
+    "bus",
+    "car",
+    "drivable area",
+    "lane",
+    "motor",
+    "person",
+    "rider",
+    "traffic light",
+    "traffic sign",
+    "train",
+    "truck",
+]
+class_mappings = {}
 for i in classes:
     class_mappings[i] = classes.index(i)
 
-for i in ["images","labels"]:
-    os.makedirs(os.path.join(output_dir,i), exist_ok=True)
-    for j in ["train","val"]:
-        os.makedirs(os.path.join(output_dir,i,j), exist_ok=True)
+for i in ["images", "labels"]:
+    os.makedirs(os.path.join(output_dir, i), exist_ok=True)
+    for j in ["train", "val"]:
+        os.makedirs(os.path.join(output_dir, i, j), exist_ok=True)
 
 # Function to write labels to TXT file
-def write_labels(image_set,output_folder,annotations_dict,mode):
+
+
+def write_labels(image_set, output_folder, annotations_dict, mode):
 
     for img_name in image_set:
+        # Load the image to get its dimensions
+        img_path = os.path.join(_10k_path, mode, img_name)
+        with Image.open(img_path) as img:
+            img_width, img_height = img.size  # Get actual image dimensions
 
         # Get the annotations for the current image
         if img_name in annotations_dict:
 
-            labels = annotations_dict[img_name]['labels']
-            with open(os.path.join(output_folder,f"{img_name[:-4]}.txt"), 'w') as label_file:
+            labels = annotations_dict[img_name]["labels"]
+            with open(
+                os.path.join(output_folder, f"{img_name[:-4]}.txt"), "w"
+            ) as label_file:
                 for label in labels:
-                    category = label['category']
-                    # Get bounding box coordinates
-                    if 'box2d' in label:
-                        box = label['box2d']
-                        x_center = (box['x1'] + box['x2']) / 2
-                        y_center = (box['y1'] + box['y2']) / 2
-                        width = box['x2'] - box['x1']
-                        height = box['y2'] - box['y1']
-                        # Normalize values to range [0, 1]
-                        x_center /= 1280  # Assuming image width is 1280
-                        y_center /= 720   # Assuming image height is 720
-                        width /= 1280
-                        height /= 720
+                    category = label["category"]
+                    if "box2d" in label:
+                        box = label["box2d"]
+                        x_center = (box["x1"] + box["x2"]) / 2
+                        y_center = (box["y1"] + box["y2"]) / 2
+                        width = box["x2"] - box["x1"]
+                        height = box["y2"] - box["y1"]
+                        # Normalize values to the image size
+                        x_center /= img_width
+                        y_center /= img_height
+                        width /= img_width
+                        height /= img_height
                         # Write to label file
-                        class_id = class_mappings[category]  # Define this mapping function
-                        label_file.write(f"{class_id} {x_center} {y_center} {width} {height}\n")
-                    
-                    elif 'poly2d' in label:
-                        # Handle poly2d annotations
-                        for polygon in label['poly2d']:
-                            vertices = polygon['vertices']
-                            # Calculate the bounding box for the polygon
+                        class_id = class_mappings[category]
+                        label_file.write(
+                            f"{class_id} {x_center} {y_center} {width} {height}\n"
+                        )
+
+                    elif "poly2d" in label:
+                        for polygon in label["poly2d"]:
+                            vertices = polygon["vertices"]
                             x_coords = [v[0] for v in vertices]
                             y_coords = [v[1] for v in vertices]
                             x_min = min(x_coords)
@@ -75,62 +95,69 @@ def write_labels(image_set,output_folder,annotations_dict,mode):
                             y_center = (y_min + y_max) / 2
                             width = x_max - x_min
                             height = y_max - y_min
-                            # Normalize values to range [0, 1]
-                            x_center /= 1280  # Assuming image width is 1280
-                            y_center /= 720   # Assuming image height is 720
-                            width /= 1280
-                            height /= 720
+                            # Normalize values to the image size
+                            x_center /= img_width
+                            y_center /= img_height
+                            width /= img_width
+                            height /= img_height
                             # Write to label file
                             class_id = class_mappings[category]
-                            label_file.write(f"{class_id} {x_center} {y_center} {width} {height}\n")
-                    shutil.copy(os.path.join(image_folder,mode,img_name), os.path.join(output_dir,"images",mode,img_name))
+                            label_file.write(
+                                f"{class_id} {x_center} {y_center} {width} {height}\n"
+                            )
 
+            # Copy the image to the correct directory
+            shutil.copy(img_path, os.path.join(output_dir, "images", mode, img_name))
 
 
 def create_labels():
     # Load JSON annotations
-    with open(train_json_path, 'r') as f:
+    with open(train_json_path, "r") as f:
         train_annotations = json.load(f)
 
-    with open(val_json_path, 'r') as f:
+    with open(val_json_path, "r") as f:
         val_annotations = json.load(f)
 
     # Concatenate the annotations
     all_annotations = train_annotations + val_annotations
 
     # Create a dictionary to store the labels
-    annotations_dict = {img['name']: img for img in all_annotations}
+    annotations_dict = {img["name"]: img for img in all_annotations}
 
-    # Get image filenames
-    train_images = [f.name for f in Path(train_images_path).glob('*.jpg')]  # Assuming .jpg format
-    val_images = [f.name for f in Path(val_images_path).glob('*.jpg')]
+    img_list = os.listdir(train_images_path)
+    train_images = random.sample(img_list, 1500)
 
+    img_list = os.listdir(val_images_path)
+    val_images = random.sample(img_list, 800)
+
+
+    # print(len(train_images),len(val_images))
     # Write labels for train and val sets
-    write_labels(train_images, train_op,annotations_dict,"train")
+    write_labels(train_images, train_op, annotations_dict, "train")
     print("Labels created successfully!")
 
-    write_labels(val_images, val_op,annotations_dict,"val")
+    write_labels(val_images, val_op, annotations_dict, "val")
     print("Labels created successfully!")
+
+def move_to_val():
+    images_dir = os.path.join(output_dir,"images","train")
+
+    labels_dir = os.path.join(output_dir,"labels")
+
+    images_to_move = list(Path(images_dir).glob('*.jpg'))[:100]  # Assuming image format is .jpg
+
+    # Move the images and collect their annotations
+    for image_path in images_to_move:
+        image_name = image_path.name
+
+        only_name = Path(image_name).stem
+        shutil.move(str(image_path),os.path.join(output_dir,"images","val"))
+
+        shutil.move(os.path.join(labels_dir,"train",only_name+".txt"),os.path.join(labels_dir,"val",only_name+".txt"))
 
 
 # create_labels()
-
-
-images_dir = os.path.join(output_dir,"images","train")
-
-labels_dir = os.path.join(output_dir,"labels")
-
-images_to_move = list(Path(images_dir).glob('*.jpg'))[:100]  # Assuming image format is .jpg
-
-# Move the images and collect their annotations
-for image_path in images_to_move:
-    image_name = image_path.name
-
-    only_name = Path(image_name).stem
-    shutil.move(str(image_path),os.path.join(output_dir,"images","val"))
-
-    shutil.move(os.path.join(labels_dir,"train",only_name+".txt"),os.path.join(labels_dir,"val",only_name+".txt"))
-
+move_to_val()
 
 # # Used code
 
@@ -140,11 +167,8 @@ for image_path in images_to_move:
 # output_test_dir = os.path.join(output_dir, "test")
 
 
-
-
 # Paths to your dataset and JSON file
 # json_file_path = 'path/to/your/annotations.json'  # Update this path
-
 
 
 # # Create output folders if they don't exist
@@ -154,23 +178,16 @@ for image_path in images_to_move:
 # output_val.mkdir(parents=True, exist_ok=True)
 
 
-
-
-
-
 # # Make sure output folders exist
 # os.makedirs(output_train_dir, exist_ok=True)
 # os.makedirs(output_val_dir, exist_ok=True)
 # os.makedirs(output_test_dir, exist_ok=True)
 
 
-
 # # Number of images to extract
 # num_train = 1000
 # num_val = 500
 # num_test = 500
-
-
 
 
 # # Save the selected annotations to a new file
