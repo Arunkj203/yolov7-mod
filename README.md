@@ -112,6 +112,3 @@ If you use this work, please cite the original paper:
 in **IEEE Access**, vol. 11, pp. 134866-134877, Dec. 2023, doi: [10.1109/ACCESS.2023.3335826](https://doi.org/10.1109/ACCESS.2023.3335826).
 
 ---
-
-
-Do you want me to **add a side-by-side table** (Paper vs Your Reimplementation results) so the improvement is crystal clear in the README?
