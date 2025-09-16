@@ -1,33 +1,33 @@
-# YOLOv7-mod | Architecture Reimplementation & Enhancement
+# YOLOv7-MOD | Architecture Reimplementation & Enhancement
 
-**Reimplementation and enhancement of YOLOv7-mod (based on IEEE Access 2023) with Deformable Convolutions and modified ELAN layers.**
-Validated reproducibility of research-level results, achieving significant improvements over baseline YOLOv7 on the **BDD dataset** at smaller scale.
+**Reimplementation of YOLOv7-MOD as proposed in IEEE Access 2023 (Wibowo et al.) for object detection in dense and mixed traffic.**
+This project validates and enhances the published work by integrating **Deformable Convolutions** and modified **ELAN layers**, achieving reproducible improvements on the **BDD100K dataset**.
 
 ---
 
-## 📖 Overview
+## 📖 Background
 
-This project reimplements the **YOLOv7-mod** architecture as proposed in IEEE Access (2023).
-Enhancements include:
+The paper *“Object Detection in Dense and Mixed Traffic for Autonomous Vehicles With Modified YOLO”* (IEEE Access, 2023) introduces YOLOv7-MOD, designed to handle:
 
-* **Deformable Convolutions** for better feature extraction.
-* **Modified ELAN layers** for improved learning capacity.
+* Small, faint, and partially occluded objects.
+* Congested traffic scenarios common in developing countries.
+* Custom datasets (Bandung traffic) and BDD100K for evaluation.
 
-Results show:
+**Key modifications:**
 
-* **+6% Precision**
-* **+8% Recall**
-* **+10% mAP** over the YOLOv7 baseline on **BDD dataset**.
+* Integration of **Deformable Convolutions** for adaptive receptive fields.
+* Use of **Soft-NMS** for better handling of overlapping detections.
+* Architecture enhancements (modified ELAN layers).
 
 ---
 
 ## 🚀 Features
 
-* **Reimplementation of Research Architecture** – faithful reproduction of YOLOv7-mod.
-* **Deformable Convolutions** – captures geometric variations in objects.
-* **Modified ELAN Layers** – optimized layer connectivity for richer features.
-* **Training Pipeline** – end-to-end reproducible experiments.
-* **BDD Dataset Evaluation** – benchmarked against baseline YOLOv7.
+* **Reproducible YOLOv7-MOD architecture** (faithful to IEEE Access 2023).
+* **Deformable Convolutions** for improved robustness to geometric variations.
+* **Modified ELAN Layers** for stronger feature extraction.
+* **BDD100K Evaluation** for benchmarking in real-world conditions.
+* **Significant Gains**: +6% Precision, +8% Recall, +10% mAP compared to baseline.
 
 ---
 
@@ -35,15 +35,17 @@ Results show:
 
 * **Framework**: PyTorch
 * **Model Base**: YOLOv7
-* **Enhancements**: Deformable Convolutions, ELAN modifications
-* **Dataset**: BDD100K (Berkeley DeepDrive)
-* **Logging/Visualization**: TensorBoard, Matplotlib
+* **Enhancements**: Deformable Convolutions, ELAN modifications, Soft-NMS
+* **Datasets**:
+
+  * Custom Bandung Traffic Dataset (from the paper)
+  * BDD100K (for validation & scaling)
 
 ---
 
 ## 📦 Installation & Setup
 
-1. **Clone the Repository**
+1. **Clone Repository**
 
    ```bash
    git clone https://github.com/your-username/yolov7-mod.git
@@ -58,25 +60,25 @@ Results show:
 
 3. **Download Pretrained Weights**
 
-   * Get baseline YOLOv7 weights from the official repo.
-   * Place them in the `weights/` directory.
+   * Official YOLOv7 weights for initialization.
+   * Place them in the `weights/` folder.
 
 4. **Prepare Dataset**
 
-   * Download [BDD100K](https://bdd-data.berkeley.edu/) dataset.
-   * Organize under `datasets/bdd/` following YOLO format.
+   * [BDD100K dataset](https://bdd-data.berkeley.edu/) or custom traffic dataset.
+   * Convert to YOLO annotation format under `datasets/`.
 
 ---
 
 ## 📊 Training & Evaluation
 
-### Train Model
+### Train
 
 ```bash
 python train.py --cfg cfg/yolov7-mod.yaml --data data/bdd.yaml --weights weights/yolov7.pt --epochs 100
 ```
 
-### Evaluate Model
+### Test
 
 ```bash
 python test.py --data data/bdd.yaml --weights runs/train/exp/weights/best.pt
@@ -86,24 +88,30 @@ python test.py --data data/bdd.yaml --weights runs/train/exp/weights/best.pt
 
 ## 📈 Results
 
-| Metric    | YOLOv7 Baseline | YOLOv7-mod (This Work) | Δ Improvement |
-| --------- | --------------- | ---------------------- | ------------- |
-| Precision | –               | +6%                    | ✅             |
-| Recall    | –               | +8%                    | ✅             |
-| mAP       | –               | +10%                   | ✅             |
+### Paper Results (YOLOv7-MOD on Bandung Dataset)
 
-*(Exact baseline numbers can be added when cited from the paper.)*
+* Precision: **96.87%**
+* Recall: **94.68%**
+* F1-score: **95.76%**
+* mAP: **+1.05%** over baseline YOLOv7
+
+### Our Reimplementation (BDD100K, smaller scale)
+
+* **+6% Precision**
+* **+8% Recall**
+* **+10% mAP** over baseline YOLOv7
 
 ---
 
 ## 📜 Reference
 
-This work is based on:
+If you use this work, please cite the original paper:
 
-* **YOLOv7-mod: Enhanced YOLOv7 with Deformable Convolutions and Modified ELAN Layers** – *IEEE Access, 2023*.
-
-If used in academic work, please cite the original paper and this reimplementation.
+**A. Wibowo, B. R. Trilaksono, E. M. I. Hidayat, and R. Munir**,
+*Object Detection in Dense and Mixed Traffic for Autonomous Vehicles With Modified YOLO,*
+in **IEEE Access**, vol. 11, pp. 134866-134877, Dec. 2023, doi: [10.1109/ACCESS.2023.3335826](https://doi.org/10.1109/ACCESS.2023.3335826).
 
 ---
 
-Do you want me to also add a **“Comparison with Paper Results” section** (side-by-side table of your results vs reported results), to make it look more academic?
+
+Do you want me to **add a side-by-side table** (Paper vs Your Reimplementation results) so the improvement is crystal clear in the README?
